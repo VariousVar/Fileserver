@@ -1,5 +1,11 @@
 package ru.variousvar.fileserver.server;
 
+import ru.variousvar.fileserver.Connection;
+import ru.variousvar.fileserver.message.Message;
+import ru.variousvar.fileserver.message.MessageType;
+import ru.variousvar.fileserver.operation.MessageOperationFactory;
+import ru.variousvar.fileserver.operation.message.MessageOperation;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
@@ -19,7 +25,7 @@ public class Server {
 	    this(rootPath, port, null);
     }
 
-    public Server(String rootPath, int port, byte[] inet4Address) throws IOException{
+    public Server(String rootPath, int port, byte[] inet4Address) throws IOException {
 		this.rootPath = Paths.get(rootPath).toRealPath();
 
 	    if (inet4Address != null)
@@ -58,7 +64,24 @@ public class Server {
 
 		@Override
 		public void run() {
+			try (Connection connection = new Connection(socket)) {
 
+				while (true) {
+					Message message = connection.receive();
+					// TODO add connection auto closing
+					if (message.getMessageType() == MessageType.CLOSE)
+						break;
+
+					MessageOperation operation = MessageOperationFactory.get(message.getMessageType());
+					Message outMessage = operation.createResponse(
+							message.withProperty("rootPath", rootPath)
+					);
+
+					connection.send(outMessage);
+				}
+			} catch (IOException | ClassNotFoundException e) {
+				logger.severe("Communication error with client: " + socket.getRemoteSocketAddress());
+			}
 		}
 	}
 }
