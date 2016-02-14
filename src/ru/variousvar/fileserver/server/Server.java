@@ -6,16 +6,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
     private Path rootPath;
     private ServerSocket serverSocket;
-    private ExecutorService executor = Executors.newCachedThreadPool();
 
 	private final Logger logger = Logger.getLogger("server");
 
@@ -39,8 +34,10 @@ public class Server {
 		logger.info("File server starts to work");
 
 		try {
-			Socket accept = serverSocket.accept();
-			executor.submit(new Handler(accept));
+			while (true) {
+				Socket accept = serverSocket.accept();
+				new Thread(new Handler(accept)).start();
+			}
 		} catch (IOException e) {
 			logger.severe("Server cannot receive messages");
 		} finally {
