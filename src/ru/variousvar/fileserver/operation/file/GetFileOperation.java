@@ -7,9 +7,10 @@ import java.nio.file.Path;
 public class GetFileOperation implements FileOperation {
 	@Override
 	public byte[] operate(Path path) throws IOException{
-		if (path.toFile().exists())
-			return Files.readAllBytes(path);
+		if (path.toFile().isFile())
+			if (path.toFile().exists())
+				return Files.readAllBytes(path);
 
-		throw new IOException("No such file: " + path.toString());
+		throw new IOException("No such file: " + path.getFileName().toString());
 	}
 }
