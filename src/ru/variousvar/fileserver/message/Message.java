@@ -22,6 +22,8 @@ public class Message implements Serializable {
 		if (properties == null)
 			properties = new HashMap<>();
 
+		properties.put(property, value);
+
 		return this;
 	}
 
