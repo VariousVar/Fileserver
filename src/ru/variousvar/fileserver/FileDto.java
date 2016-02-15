@@ -29,8 +29,8 @@ public class FileDto implements Serializable, Comparable<FileDto> {
 	public int compareTo(FileDto o) {
 		int compare = Boolean.compare(o.dir, this.dir);
 
-		if (compare != 0)
-			compare = o.name.compareTo(this.name);
+		if (compare == 0)
+			compare = this.name.compareTo(o.name);
 
 		return compare;
 	}
