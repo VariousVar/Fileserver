@@ -14,7 +14,6 @@ public class ListFileOperation implements FileOperation {
 	@Override
 	public List<FileDto> operate(Path path) throws IOException{
 		List<FileDto> dtos = Files.list(path)
-				.map(path::relativize)
 				.map(p -> new FileDto(p.toFile()))
 				.sorted()
 				.collect(Collectors.toList());
