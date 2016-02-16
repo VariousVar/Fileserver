@@ -65,14 +65,17 @@ public class Server {
 		@Override
 		public void run() {
 			try (Connection connection = new Connection(socket)) {
+                logger.info("File server establish new connection with: " + socket.getRemoteSocketAddress());
 
 				while (true) {
 					Message message = connection.receive();
 					// TODO add connection auto closing
-					if (message.getMessageType() == MessageType.CLOSE)
-						break;
+					if (message.getMessageType() == MessageType.CLOSE) {
+                        connection.close();
+                        break;
+                    }
 
-					MessageOperation operation = MessageOperationFactory.get(message.getMessageType());
+                    MessageOperation operation = MessageOperationFactory.get(message.getMessageType());
 					Message outMessage = operation.createResponse(
 							message.withProperty("rootPath", rootPath)
 					);
@@ -80,7 +83,9 @@ public class Server {
 					connection.send(outMessage);
 				}
 			} catch (IOException | ClassNotFoundException e) {
-				logger.severe("Communication error with client: " + socket.getRemoteSocketAddress());
+				logger.warning(
+                        "Communication error with client: " + socket.getRemoteSocketAddress() +
+                        ". The reason was: " + e.getMessage());
 			}
 		}
 	}

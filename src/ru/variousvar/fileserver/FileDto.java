@@ -20,7 +20,27 @@ public class FileDto implements Serializable, Comparable<FileDto> {
 		return dir;
 	}
 
-	@Override
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileDto fileDto = (FileDto) o;
+
+        if (dir != fileDto.dir) return false;
+        if (!name.equals(fileDto.name)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + (dir ? 1 : 0);
+        return result;
+    }
+
+    @Override
 	public String toString() {
 		return name + (dir ? " <dir>" : "");
 	}
