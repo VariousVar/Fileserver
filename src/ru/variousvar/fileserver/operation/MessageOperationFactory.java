@@ -1,10 +1,7 @@
 package ru.variousvar.fileserver.operation;
 
 import ru.variousvar.fileserver.message.MessageType;
-import ru.variousvar.fileserver.operation.message.BadRequestMessageOperation;
-import ru.variousvar.fileserver.operation.message.GetMessageOperation;
-import ru.variousvar.fileserver.operation.message.ListMessageOperation;
-import ru.variousvar.fileserver.operation.message.MessageOperation;
+import ru.variousvar.fileserver.operation.message.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +12,7 @@ public class MessageOperationFactory {
 	static {
 		map.put(MessageType.LIST, new ListMessageOperation());
 		map.put(MessageType.GET, new GetMessageOperation());
+		map.put(MessageType.PATH_SEPARATOR, new PathSeparatorMessageOperation());
 	}
 
 	public static MessageOperation get(MessageType type) {
