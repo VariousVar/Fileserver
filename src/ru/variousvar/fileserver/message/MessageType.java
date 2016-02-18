@@ -1,7 +1,7 @@
 package ru.variousvar.fileserver.message;
 
 public enum MessageType {
-	PATH_SEPARATOR,
+	FILE_SEPARATOR,
 	LIST,
 	GET,
 	SEND_FILE,

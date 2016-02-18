@@ -12,7 +12,7 @@ public class MessageOperationFactory {
 	static {
 		map.put(MessageType.LIST, new ListMessageOperation());
 		map.put(MessageType.GET, new GetMessageOperation());
-		map.put(MessageType.PATH_SEPARATOR, new PathSeparatorMessageOperation());
+		map.put(MessageType.FILE_SEPARATOR, new FileSeparatorMessageOperation());
 	}
 
 	public static MessageOperation get(MessageType type) {
