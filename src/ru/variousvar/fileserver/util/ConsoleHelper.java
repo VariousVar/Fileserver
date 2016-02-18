@@ -1,4 +1,4 @@
-package ru.variousvar;
+package ru.variousvar.fileserver.util;
 
 import java.util.Scanner;
 

@@ -25,11 +25,11 @@ public class Server {
 	    this(rootPath, port, null);
     }
 
-    public Server(String rootPath, int port, byte[] inet4Address) throws IOException {
+    public Server(String rootPath, int port, String host) throws IOException {
 		this.rootPath = Paths.get(rootPath).toRealPath();
 
-	    if (inet4Address != null)
-		    this.serverSocket = new ServerSocket(port, 50, Inet4Address.getByAddress(inet4Address));
+	    if (host != null)
+		    this.serverSocket = new ServerSocket(port, 50, Inet4Address.getByName(host));
 	    else
 	        this.serverSocket = new ServerSocket(port, 50);
 
@@ -69,7 +69,6 @@ public class Server {
 
 				while (true) {
 					Message message = connection.receive();
-					// TODO add connection auto closing
 					if (message.getMessageType() == MessageType.CLOSE) {
                         connection.close();
                         break;
