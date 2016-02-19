@@ -14,6 +14,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
+/**
+ * {@code Server} represent file server. It should execute communication through TCP socket and operate on messages.
+ */
 public class Server {
     private Path rootPath;
     private ServerSocket serverSocket;
@@ -36,8 +39,11 @@ public class Server {
 	    logger.info("File server configured.");
     }
 
+	/**
+	 * Starts a server. Process input messages via communication based on {@code Handler}.
+	 */
 	public void start() {
-		logger.info("File server starts to work");
+		logger.info("File server started");
 
 		try {
 			while (true) {
@@ -50,11 +56,14 @@ public class Server {
 			try {
 				serverSocket.close();
 			} catch (IOException e) {
-				// not interesting?
+				// not interesting
 			}
 		}
 	}
 
+	/**
+	 *  Handler receives new connection and operate over it. It send/receive messages based on {@link Message}.
+	 */
 	class Handler implements Runnable {
 		private Socket socket;
 
