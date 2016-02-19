@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="FileServer">
+    <property name="classes" value="out/production"/>
+
+    <target name="compile" description="compile project">
+        <mkdir dir="${classes}"/>
+        <javac srcdir="." destdir="${classes}" encoding="UTF-8"/>
+    </target>
+
+    <target name="runServer" description="runs fileserver">
+        <java classname="ru.variousvar.fileserver.ServerMain">
+            <classpath>
+                <pathelement path="${classes}"/>
+            </classpath>
+        </java>
+    </target>
+    <target name="runClient" description="runs client">
+        <java classname="ru.variousvar.fileserver.ClientMain">
+            <classpath>
+                <pathelement path="${classes}"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>
