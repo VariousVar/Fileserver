@@ -15,19 +15,21 @@ public class ListMessageOperation implements MessageOperation {
 	public Message createResponse(Message originalMessage) {
 		try {
 			// TODO secure rootPath from relative path from message to prevent exit out from rootPath
-
-			Path path = (Path) originalMessage.property("rootPath");
+			Path root, operative;
+			root = operative = (Path) originalMessage.property("rootPath");
 			String relativePath = (String) originalMessage.property("rel");
 
 			if (relativePath != null) {
-				path = path.resolve(Paths.get(relativePath));
+				operative = operative.resolve(Paths.get(relativePath)).normalize();
+				if (!operative.startsWith(root))
+					throw new IOException("Attempt to go out server operative bounds.");
 			}
 
-			List<FileDto> list = new ListFileOperation().operate(path);
+			List<FileDto> list = new ListFileOperation().operate(operative);
 
 			return new Message(MessageType.LIST, list);
 		} catch (IOException e) {
-			return new Message(MessageType.BAD_REQUEST, "IO operation failed due to reason: " + e.getMessage());
+			return new Message(MessageType.BAD_REQUEST, e.getMessage());
 		}
 	}
 }
