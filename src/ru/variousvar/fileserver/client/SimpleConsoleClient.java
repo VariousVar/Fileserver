@@ -207,10 +207,15 @@ public class SimpleConsoleClient implements Client {
             nextPath = choice.getName();
         else
             file = choice.getName();
-	    writeMessage("Chosen file: " + choice);
-        writeMessage("Are you sure? [yes/no]");
-        if (!askYesNo()) { nextPath = ""; file = ""; }
 
+	    writeMessage("Chosen file: " + choice);
+	    if (!choice.isDir()) {
+		    writeMessage("Are you sure? [yes/no]");
+		    if (!askYesNo()) {
+			    nextPath = "";
+			    file = "";
+		    }
+	    }
     }
 
     protected String prepareAndGetNextOp() {
