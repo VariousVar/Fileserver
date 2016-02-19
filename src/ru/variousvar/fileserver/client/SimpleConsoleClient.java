@@ -13,7 +13,7 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.variousvar.ConsoleHelper.*;
+import static ru.variousvar.fileserver.util.ConsoleHelper.*;
 
 public class SimpleConsoleClient implements Client {
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -27,12 +27,13 @@ public class SimpleConsoleClient implements Client {
     private List<FileDto> files;
 
 	private Message lastErrorMessage;
-	private ErrorType errorType;
+	private String errorType;
 
 	private boolean broken = false;
 	private boolean recoverable = true;
+    private boolean exit;
 
-	public SimpleConsoleClient(int port) throws IOException {
+    public SimpleConsoleClient(int port) throws IOException {
 		Socket socket = new Socket("localhost", port);
 		this.connection = new Connection(socket);
 	}
@@ -58,13 +59,11 @@ public class SimpleConsoleClient implements Client {
                         // we already make all preparations, so just go to start
                         continue;
                     case "file":
-                        connection.send(new Message(MessageType.GET)
-                                .withProperty("rel", path)
-                                .withProperty("file", file));
-                        Message fileMessage = connection.receive();
-                        saveFile((byte[]) fileMessage.getData());
+                        saveFile();
                         askForClearChoice();
                         break;
+                    case "nop":
+                        continue;
                     case "exit":
                         endCommunication();
                         return;
@@ -81,6 +80,12 @@ public class SimpleConsoleClient implements Client {
         }
 	}
 
+    /**
+     * Check client consistency, which may be broken after any operation that perform network connection operation.
+     * It try to recover client state and throw exception if it not possible.
+     *
+     * @throws ClientCommunicationException if client recovering is not possible.
+     */
 	protected void checkConsistency() {
 		if (broken) {
 			tryToRecover();
@@ -99,7 +104,7 @@ public class SimpleConsoleClient implements Client {
 	}
 
 	protected void tryToRecover() {
-
+        // not yet implemented
 	}
 
 	protected void getPathSeparator() throws IOException, ClassNotFoundException {
@@ -111,7 +116,7 @@ public class SimpleConsoleClient implements Client {
 			FILE_SEPARATOR = (String) receive.getData();
 		else if (receive.getMessageType() == MessageType.BAD_REQUEST) {
 			lastErrorMessage = send;
-			errorType = (ErrorType) receive.getData();
+			errorType = (String) receive.getData();
 			broken = true;
 			recoverable = false;
 		}
@@ -153,14 +158,20 @@ public class SimpleConsoleClient implements Client {
     protected void makeChoice() {
         writeMessage("Choose file to download or directory to view.");
 	    writeMessage("Type '..' to go up.");
-        writeMessage("Type 'exit' to end communication.");
+        writeMessage("Press enter to end communication.");
         // clear previous choose
         nextPath = "";
         file = "";
+        exit = false;
 
         FileDto choice = null;
         while (true) {
             String filename = readString();
+
+	        if (filename.isEmpty()) {
+                exit = true;
+                return;
+            }
 
             if ("..".equals(filename)) {
                 nextPath = filename;
@@ -197,11 +208,18 @@ public class SimpleConsoleClient implements Client {
         else
             file = choice.getName();
 	    writeMessage("Chosen file: " + choice);
+        writeMessage("Are you sure? [yes/no]");
+        if (!askYesNo()) { nextPath = ""; file = ""; }
+
     }
 
     protected String prepareAndGetNextOp() {
+        if (exit)
+            return "exit";
+        else if (nextPath.isEmpty() && file.isEmpty())
+            return "nop";
         // operate on path
-        if (!nextPath.isEmpty()) {
+        else if (!nextPath.isEmpty()) {
             if (nextPath.equals("..")) {
                 if (path.contains(FILE_SEPARATOR))
                     path = path.substring(0, path.lastIndexOf(FILE_SEPARATOR));
@@ -218,12 +236,27 @@ public class SimpleConsoleClient implements Client {
         else if (!file.isEmpty()) {
             return "file";
         }
-        else
-            return "exit";
+
+        return "exit";
     }
 
-    protected void saveFile(byte[] bytes) {
-	    if (defaultLocation != null) {
+    protected void saveFile() throws IOException, ClassNotFoundException {
+        Message send = new Message(MessageType.GET)
+                .withProperty("rel", path)
+                .withProperty("file", file);
+        connection.send(send);
+
+        Message fileMessage = connection.receive();
+        if (!(fileMessage.getMessageType() == MessageType.SEND_FILE)) {
+            broken = true;
+            lastErrorMessage = send;
+            errorType = (String) fileMessage.getData();
+            writeMessage("File cannot be received");
+            return;
+        }
+        byte[] bytes = (byte[]) fileMessage.getData();
+
+        if (defaultLocation != null) {
 		    writeMessage("Save to default location? [" + defaultLocation + "]. [yes/no]:");
 
 		    if (askYesNo()) {
@@ -340,7 +373,7 @@ public class SimpleConsoleClient implements Client {
         try {
             connection.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            // nothing to do
         }
     }
 
