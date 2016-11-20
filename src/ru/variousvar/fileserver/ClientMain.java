@@ -1,7 +1,7 @@
 package ru.variousvar.fileserver;
 
 import ru.variousvar.fileserver.client.Client;
-import ru.variousvar.fileserver.client.SimpleConsoleClient;
+import ru.variousvar.fileserver.client.ConsoleClient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class ClientMain {
 			} catch (NumberFormatException ex) {
 				System.out.println("Only digits allowed");}
 		}
-		Client client = new SimpleConsoleClient(host, port);
+		Client client = new ConsoleClient(host, port);
 		client.start();
 	}
 }
